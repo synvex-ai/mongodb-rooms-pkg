@@ -1,9 +1,11 @@
 import importlib
 from loguru import logger
-from .actions.example import example
+from .actions.describe import describe
 from .services.credentials import CredentialsRegistry
+from mongodb_rooms_pkg.services.connection import build_uri, create_connection
 
-class TemplateRoomsAddon:
+
+class MongoDBRoomsAddon:
     """
     Template Rooms Package Addon Class
     
@@ -14,11 +16,32 @@ class TemplateRoomsAddon:
     def __init__(self):
         self.modules = ["actions", "configuration", "memory", "services", "storage", "tools", "utils"]
         self.config = {}
+        self.connection = None
+        self.initConnection()
         self.credentials = CredentialsRegistry()
 
-    # add your actions here  
-    def example(self, param1: str, param2: str) -> dict:
-        return example(self.config, param1=param1, param2=param2)
+    def describe(self) -> dict:
+        return describe(self.config)
+
+    def initConnection(self) -> bool:
+        """
+        Initialize connection with the provided configuration.
+        Returns:
+            bool: True if connection is initialized successfully, False otherwise
+        """
+        logger.info("Initializing connection with provided configuration...")
+        try:
+            uri = build_uri(self.config)
+            logger.debug(f"Connection URI for MongoDB: {uri}")
+            self.connection = create_connection(uri)
+            if self.connection is None:
+                logger.error("MongoDB client connection failed.")
+                return False
+            logger.info("Connection initialized successfully for MongoDB")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize connection for MongoDB: {e}")
+            return False
 
     def test(self) -> bool:
         """
@@ -91,7 +114,7 @@ class TemplateRoomsAddon:
             bool: True if configuration is loaded successfully, False otherwise
         """
         try:
-            from template_rooms_pkg.configuration import CustomAddonConfig
+            from mongodb_rooms_pkg.configuration import CustomAddonConfig
             self.config = CustomAddonConfig(**addon_config)
             logger.info(f"Addon configuration loaded successfully: {self.config}")
             return True
