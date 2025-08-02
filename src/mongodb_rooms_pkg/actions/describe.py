@@ -9,7 +9,7 @@ class ActionInput(BaseModel):
     pass
     
 class ActionOutput(OutputBase):
-    data: Optional[dict] = None
+    data: Optional[str] = None
 
 def describe(config: CustomAddonConfig) -> ActionResponse:
     logger.debug("MongoDB rooms package - Example action executed successfully!")
@@ -20,5 +20,5 @@ def describe(config: CustomAddonConfig) -> ActionResponse:
     tokens = TokensSchema(stepAmount=2000, totalCurrentAmount=16236)
     message = "Action executed successfully"
     code = 200
-    output = ActionOutput(data={""})
+    output = ActionOutput(data="Response test")
     return ActionResponse(output=output, tokens=tokens, message=message, code=code)
