@@ -33,6 +33,10 @@ class MongoDBRoomsAddon:
         Returns:
             bool: True if connection is initialized successfully, False otherwise
         """
+        if not self.config or not hasattr(self.config, 'scheme'):
+            logger.error("No valid configuration found. Cannot initialize connection.")
+            return False
+            
         logger.info("Initializing connection with provided configuration...")
         try:
             uri = build_uri(self.config)
@@ -56,8 +60,8 @@ class MongoDBRoomsAddon:
         Returns:
             bool: True if test passes, False otherwise
         """
-        logger.info("Running template-rooms-pkg test...")
-        
+        logger.info(f"Running {self.__class__.__name__} test...")
+
         total_components = 0
         for module_name in self.modules:
             try:
@@ -119,7 +123,14 @@ class MongoDBRoomsAddon:
         """
         try:
             from mongodb_rooms_pkg.configuration import CustomAddonConfig
-            self.config = CustomAddonConfig(**addon_config)
+            
+            # If addon_config has nested 'config' field, extract it and merge with top level
+            config_data = addon_config.copy()
+            if 'config' in addon_config and isinstance(addon_config['config'], dict):
+                # Merge the nested config with the top level, giving priority to nested config
+                config_data.update(addon_config['config'])
+            
+            self.config = CustomAddonConfig(**config_data)
             logger.info(f"Addon configuration loaded successfully: {self.config}")
             return True
         except Exception as e:
