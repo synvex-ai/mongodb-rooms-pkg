@@ -11,7 +11,7 @@ class ActionInput(BaseModel):
 class ActionOutput(OutputBase):
     data: Optional[dict] = None
 
-def describe(config: CustomAddonConfig, inputs: ActionInput) -> ActionResponse:
+def describe(config: CustomAddonConfig) -> ActionResponse:
     logger.debug("MongoDB rooms package - Example action executed successfully!")
     logger.debug(f"Config: {config}")
     

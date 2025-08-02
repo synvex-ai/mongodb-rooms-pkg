@@ -57,7 +57,7 @@ class MongoDBRoomsAddon:
         total_components = 0
         for module_name in self.modules:
             try:
-                module = importlib.import_module(f"template_rooms_pkg.{module_name}")
+                module = importlib.import_module(f"mongodb_rooms_pkg.{module_name}")
                 components = getattr(module, '__all__', [])
                 component_count = len(components)
                 total_components += component_count
