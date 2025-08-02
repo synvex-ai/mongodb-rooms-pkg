@@ -16,9 +16,8 @@ class MongoDBRoomsAddon:
     
     def __init__(self):
         self.modules = ["actions", "configuration", "memory", "services", "storage", "tools", "utils"]
-        self.config = {}
+        self.config = None
         self.connection = None
-        self.initConnection()
         self.credentials = CredentialsRegistry()
 
     def describe(self) -> dict:
@@ -124,14 +123,21 @@ class MongoDBRoomsAddon:
         try:
             from mongodb_rooms_pkg.configuration import CustomAddonConfig
             
-            # If addon_config has nested 'config' field, extract it and merge with top level
+            logger.debug(f"Received addon_config: {addon_config}")
+            
             config_data = addon_config.copy()
             if 'config' in addon_config and isinstance(addon_config['config'], dict):
-                # Merge the nested config with the top level, giving priority to nested config
                 config_data.update(addon_config['config'])
+                logger.debug(f"Merged config_data: {config_data}")
             
             self.config = CustomAddonConfig(**config_data)
             logger.info(f"Addon configuration loaded successfully: {self.config}")
+            
+            connection_success = self.initConnection()
+            if not connection_success:
+                logger.error("Connection initialization failed after loading configuration")
+                return False
+                
             return True
         except Exception as e:
             logger.error(f"Failed to load addon configuration: {e}")
