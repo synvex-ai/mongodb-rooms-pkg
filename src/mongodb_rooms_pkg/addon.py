@@ -1,6 +1,7 @@
 import importlib
 from loguru import logger
 from .actions.describe import describe
+from .actions.describe_collection import describe_collection
 from .services.credentials import CredentialsRegistry
 from mongodb_rooms_pkg.services.connection import build_uri, create_connection
 
@@ -21,7 +22,10 @@ class MongoDBRoomsAddon:
         self.credentials = CredentialsRegistry()
 
     def describe(self) -> dict:
-        return describe(self.config)
+        return describe(self.config, self.connection)
+    
+    def describe_collection(self, collection_names: list) -> dict:
+        return describe_collection(self.config, self.connection, collection_names)
 
     def initConnection(self) -> bool:
         """
