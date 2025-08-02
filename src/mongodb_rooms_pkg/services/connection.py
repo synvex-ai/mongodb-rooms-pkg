@@ -29,11 +29,6 @@ def build_uri(config: "CustomAddonConfig") -> str:
         "authSource": config.authSource,
         "authMechanism": config.authMechanism,
         "replicaSet": config.replicaSet,
-        "tls": str(config.tls).lower() if config.tls is not None else None,
-        "tlsCAFile": config.tlsCAFile,
-        "tlsCertificateKeyFile": config.tlsCertificateKeyFile,
-        "tlsAllowInvalidCertificates": str(config.tlsAllowInvalidCertificates).lower()
-        if config.tlsAllowInvalidCertificates is not None else None,
         "connectTimeoutMS": config.connectTimeoutMS,
         "socketTimeoutMS": config.socketTimeoutMS,
         "serverSelectionTimeoutMS": config.serverSelectionTimeoutMS,
@@ -47,6 +42,14 @@ def build_uri(config: "CustomAddonConfig") -> str:
         "appname": config.appname,
         "compressors": config.compressors,
     }
+    
+    if config.tls is True:
+        query_params.update({
+            "tls": "true",
+            "tlsCAFile": config.tlsCAFile,
+            "tlsCertificateKeyFile": config.tlsCertificateKeyFile,
+            "tlsAllowInvalidCertificates": str(config.tlsAllowInvalidCertificates).lower(),
+        })
     if config.readPreferenceTags:
         for i, tag in enumerate(config.readPreferenceTags):
             query_params[f"readPreferenceTags[{i}]"] = tag
@@ -69,10 +72,21 @@ def create_connection(uri: str) -> Optional[MongoClient]:
     Returns a MongoClient if successful, otherwise None.
     """
     try:
+        logger.debug(f"Attempting to connect to MongoDB with URI: {uri}")
         client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        logger.debug("MongoClient created, testing connection with ping...")
         client.admin.command("ping")
         logger.info("Successfully connected to MongoDB.")
         return client
     except ConnectionFailure as e:
-        logger.error(f"Failed to connect to MongoDB: {e}")
+        logger.error(f"MongoDB connection failed - server unreachable or network issue: {e}")
+        return None
+    except Exception as e:
+        error_type = type(e).__name__
+        if "authentication" in str(e).lower() or "auth" in str(e).lower():
+            logger.error(f"MongoDB authentication failed - check username/password: {e}")
+        elif "invalid" in str(e).lower() and "uri" in str(e).lower():
+            logger.error(f"Invalid MongoDB URI format - check host configuration: {e}")
+        else:
+            logger.error(f"MongoDB connection failed with {error_type}: {e}")
         return None
