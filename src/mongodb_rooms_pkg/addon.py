@@ -24,8 +24,8 @@ class MongoDBRoomsAddon:
     def describe(self) -> dict:
         return describe(self.config, self.connection)
     
-    def describe_collection(self, collection_names: list) -> dict:
-        return describe_collection(self.config, self.connection, collection_names)
+    def describe_collection(self, collections: list) -> dict:
+        return describe_collection(self.config, self.connection, collections)
 
     def initConnection(self) -> bool:
         """

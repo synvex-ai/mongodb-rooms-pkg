@@ -33,12 +33,12 @@ class ActionOutput(OutputBase):
     collections: List[CollectionDescription]
     total_processed: int
 
-def describe_collection(config: CustomAddonConfig, connection, collection_names: List[str] = None) -> ActionResponse:
+def describe_collection(config: CustomAddonConfig, connection, collections: List[str] = None) -> ActionResponse:
     logger.debug("MongoDB rooms package - Describe collection action executing...")
     logger.debug(f"Config: {config}")
-    logger.debug(f"Collection names: {collection_names}")
+    logger.debug(f"Collection names: {collections}")
     
-    if not collection_names:
+    if not collections:
         tokens = TokensSchema(stepAmount=500, totalCurrentAmount=16236)
         message = "Collection names array is required"
         code = 400
@@ -64,7 +64,7 @@ def describe_collection(config: CustomAddonConfig, connection, collection_names:
         
         collection_descriptions = []
         
-        for collection_name in collection_names:
+        for collection_name in collections:
             try:
                 exists = collection_name in existing_collections
                 
@@ -148,12 +148,12 @@ def describe_collection(config: CustomAddonConfig, connection, collection_names:
                     exists=False
                 ))
         
-        tokens = TokensSchema(stepAmount=1500 * len(collection_names), totalCurrentAmount=16236 + (1500 * len(collection_names)))
-        message = f"Described {len(collection_names)} collections successfully"
+        tokens = TokensSchema(stepAmount=1500 * len(collections), totalCurrentAmount=16236 + (1500 * len(collections)))
+        message = f"Described {len(collections)} collections successfully"
         code = 200
         output = ActionOutput(
             collections=collection_descriptions,
-            total_processed=len(collection_names)
+            total_processed=len(collections)
         )
         return ActionResponse(output=output, tokens=tokens, message=message, code=code)
         
