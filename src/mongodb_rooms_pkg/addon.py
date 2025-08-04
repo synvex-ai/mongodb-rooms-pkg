@@ -2,8 +2,8 @@ import importlib
 from loguru import logger
 from .actions.describe import describe
 from .actions.describe_collection import describe_collection
+from .actions.create_collection import create_collection
 from .actions.insert import insert
-from .actions.update import update
 from .actions.delete import delete
 from .actions.upsert import upsert
 from .services.credentials import CredentialsRegistry
@@ -30,14 +30,19 @@ class MongoDBRoomsAddon:
     def describe_collection(self, collections: list) -> dict:
         return describe_collection(self.config, self.connection, collections)
     
+    def create_collection(self, collection_name: str, schema_definition: dict = None, options: dict = None) -> dict:
+        from .actions.create_collection import ActionInput
+        action_input = ActionInput(collection_name=collection_name, schema_definition=schema_definition, options=options)
+        return create_collection(self.config, self.connection, action_input)
+    
     def insert(self, collection: str, document: dict = None, documents: list = None) -> dict:
         from .actions.insert import ActionInput
         action_input = ActionInput(collection=collection, document=document, documents=documents)
         return insert(self.config, self.connection, action_input)
     
-    def update(self, collection: str, filter: dict, update: dict, update_many: bool = False, upsert: bool = False) -> dict:
-        from .actions.update import ActionInput
-        action_input = ActionInput(collection=collection, filter=filter, update=update, update_many=update_many, upsert=upsert)
+    def update(self, collection: str, filter: dict, update_data: dict, update_many: bool = False, upsert: bool = False) -> dict:
+        from .actions.update import ActionInput, update
+        action_input = ActionInput(collection=collection, filter=filter, update=update_data, update_many=update_many, upsert=upsert)
         return update(self.config, self.connection, action_input)
     
     def delete(self, collection: str, filter: dict, delete_many: bool = False) -> dict:
@@ -45,9 +50,9 @@ class MongoDBRoomsAddon:
         action_input = ActionInput(collection=collection, filter=filter, delete_many=delete_many)
         return delete(self.config, self.connection, action_input)
     
-    def upsert(self, collection: str, filter: dict, update: dict, update_many: bool = False) -> dict:
+    def upsert(self, collection: str, filter: dict, update_data: dict, update_many: bool = False) -> dict:
         from .actions.upsert import ActionInput
-        action_input = ActionInput(collection=collection, filter=filter, update=update, update_many=update_many)
+        action_input = ActionInput(collection=collection, filter=filter, update=update_data, update_many=update_many)
         return upsert(self.config, self.connection, action_input)
 
     def initConnection(self) -> bool:
