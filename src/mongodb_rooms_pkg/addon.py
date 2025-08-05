@@ -59,7 +59,7 @@ class MongoDBRoomsAddon:
     def create_collection(self, collection_name: str, schema_definition: dict = None, options: dict = None) -> dict:
         from .actions.create_collection import ActionInput
         action_input = ActionInput(collection_name=collection_name, schema_definition=schema_definition, options=options)
-        self.logger.info(f"Creating collection: {collection_name}");
+        self.logger.info(f"Creating collection: {collection_name}")
         return create_collection(self.config, self.connection, action_input)
     
     def insert(self, collection: str, document: dict = None, documents: list = None) -> dict:
