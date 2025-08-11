@@ -2,6 +2,9 @@
 
 <!-- version list -->
 
+## v1.4.0 (2025-08-11)
+
+
 ## v1.0.0 (2025-07-31)
 
 - Initial Release
