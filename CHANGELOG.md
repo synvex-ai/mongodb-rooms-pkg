@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.4.2 (2025-10-20)
+
+### Bug Fixes
+
+- **assets**: Add logo
+  ([`b93ab03`](https://github.com/synvex-ai/mongodb-rooms-pkg/commit/b93ab03867d2420cfd6a01a009c81d8d01766b8b))
+
+- **cicd**: Ruff
+  ([`be089d8`](https://github.com/synvex-ai/mongodb-rooms-pkg/commit/be089d8d391f4d6c8f04cf08bc6b664abc5a99f5))
+
+
 ## v1.4.1 (2025-08-11)
 
 
