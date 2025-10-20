@@ -1,9 +1,11 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from mongodb_rooms_pkg.memory.example import demo_memory
-from mongodb_rooms_pkg.utils.example import demo_util
 from mongodb_rooms_pkg.storage.example import demo_storage
 from mongodb_rooms_pkg.tools.example import demo_tool
+from mongodb_rooms_pkg.utils.example import demo_util
 
 
 class TestDemoMemory:
@@ -104,7 +106,7 @@ class TestAllExampleFunctions:
 
     def test_all_functions_have_unique_content(self):
         results = [demo_memory(), demo_util(), demo_storage(), demo_tool()]
-        
+
         # Check that all results are different
         for i in range(len(results)):
             for j in range(i + 1, len(results)):

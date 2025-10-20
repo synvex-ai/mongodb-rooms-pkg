@@ -1,5 +1,7 @@
+from typing import Optional
+
 from pydantic import Field, model_validator
-from typing import Optional, List, Dict
+
 from .baseconfig import BaseAddonConfig
 
 
@@ -8,7 +10,7 @@ class CustomAddonConfig(BaseAddonConfig):
     host: str = Field(..., description="Database host or comma-separated replica set members")
     port: Optional[int] = Field(27017, description="Database port (not used with 'mongodb+srv')")
     database: str = Field(..., description="Default database name to connect to")
-    
+
     # Optionnal auth parameters
     authSource: Optional[str] = Field("admin", description="Authentication database")
     authMechanism: Optional[str] = Field(None, description="Authentication mechanism (e.g. SCRAM-SHA-1, MONGODB-X509, GSSAPI)")
@@ -27,7 +29,7 @@ class CustomAddonConfig(BaseAddonConfig):
     maxPoolSize: Optional[int] = Field(None, description="Maximum number of connections in the connection pool")
     minPoolSize: Optional[int] = Field(None, description="Minimum number of connections in the connection pool")
     maxIdleTimeMS: Optional[int] = Field(None, description="Maximum idle time for connections")
-    
+
     # Write concern & journaling
     w: Optional[str] = Field(None, description="Write concern (e.g. 1, majority)")
     wtimeoutMS: Optional[int] = Field(None, description="Timeout for write concern")
@@ -35,11 +37,11 @@ class CustomAddonConfig(BaseAddonConfig):
 
     # Read preferences
     readPreference: Optional[str] = Field(None, description="Read preference (e.g. primary, secondary)")
-    readPreferenceTags: Optional[List[str]] = Field(None, description="List of read preference tags")
+    readPreferenceTags: Optional[list[str]] = Field(None, description="List of read preference tags")
 
     compressors: Optional[str] = Field(None, description="Comma-separated list of compressors (e.g. zlib,snappy)")
     appname: Optional[str] = Field(None, description="Name of the application connecting to MongoDB")
-    options: Optional[Dict[str, str]] = Field(None, description="Additional URI options as key-value pairs")
+    options: Optional[dict[str, str]] = Field(None, description="Additional URI options as key-value pairs")
 
     @model_validator(mode='after')
     def validate_db_secrets(self):

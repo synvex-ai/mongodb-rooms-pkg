@@ -1,10 +1,11 @@
+from typing import Optional
+from urllib.parse import quote_plus
+
 from loguru import logger
-from mongodb_rooms_pkg.configuration.addonconfig import CustomAddonConfig
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from typing import Optional
 
-from urllib.parse import quote_plus
+from mongodb_rooms_pkg.configuration.addonconfig import CustomAddonConfig
 
 
 def build_uri(config: "CustomAddonConfig") -> str:
@@ -42,7 +43,7 @@ def build_uri(config: "CustomAddonConfig") -> str:
         "appname": config.appname,
         "compressors": config.compressors,
     }
-    
+
     if config.tls is True:
         query_params.update({
             "tls": "true",

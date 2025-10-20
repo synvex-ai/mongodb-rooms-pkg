@@ -1,25 +1,28 @@
 import importlib
+
 from loguru import logger
+
+from mongodb_rooms_pkg.services.connection import build_uri, create_connection
+
+from .actions.create_collection import create_collection
+from .actions.delete import delete
 from .actions.describe import describe
 from .actions.describe_collection import describe_collection
-from .actions.create_collection import create_collection
 from .actions.insert import insert
-from .actions.delete import delete
 from .actions.upsert import upsert
 from .services.credentials import CredentialsRegistry
-from mongodb_rooms_pkg.services.connection import build_uri, create_connection
 
 
 class MongoDBRoomsAddon:
     """
     Template Rooms Package Addon Class
-    
+
     This class provides access to all template rooms package functionality
     and can be instantiated by external programs using this package.
     """
-    
+
     type = "storage"
-    
+
     def __init__(self):
         self.modules = ["actions", "configuration", "memory", "services", "storage", "tools", "utils"]
         self.config = None
@@ -33,53 +36,53 @@ class MongoDBRoomsAddon:
             def __init__(self, addon_type):
                 self.addon_type = addon_type
                 self._logger = logger
-            
+
             def debug(self, message):
                 self._logger.debug(f"[TYPE: {self.addon_type.upper()}] {message}")
-            
+
             def info(self, message):
                 self._logger.info(f"[TYPE: {self.addon_type.upper()}] {message}")
-            
+
             def warning(self, message):
                 self._logger.warning(f"[TYPE: {self.addon_type.upper()}] {message}")
-            
+
             def error(self, message):
                 self._logger.error(f"[TYPE: {self.addon_type.upper()}] {message}")
-        
+
         return PrefixedLogger(self.type)
 
     def describe(self) -> dict:
         self.logger.info("Describing MongoDB Rooms Addon...")
         return describe(self.config, self.connection)
-    
+
     def describe_collection(self, collections: list) -> dict:
         self.logger.info(f"Describing collections: {collections}")
         return describe_collection(self.config, self.connection, collections)
-    
+
     def create_collection(self, collection_name: str, schema_definition: dict = None, options: dict = None) -> dict:
         from .actions.create_collection import ActionInput
         action_input = ActionInput(collection_name=collection_name, schema_definition=schema_definition, options=options)
         self.logger.info(f"Creating collection: {collection_name}")
         return create_collection(self.config, self.connection, action_input)
-    
+
     def insert(self, collection: str, document: dict = None, documents: list = None) -> dict:
         from .actions.insert import ActionInput
         action_input = ActionInput(collection=collection, document=document, documents=documents)
         self.logger.info(f"Inserting into collection: {collection}")
         return insert(self.config, self.connection, action_input)
-    
+
     def update(self, collection: str, filter: dict, update_data: dict, update_many: bool = False, upsert: bool = False) -> dict:
         from .actions.update import ActionInput, update
         action_input = ActionInput(collection=collection, filter=filter, update=update_data, update_many=update_many, upsert=upsert)
         self.logger.info(f"Updating collection: {collection}")
         return update(self.config, self.connection, action_input)
-    
+
     def delete(self, collection: str, filter: dict, delete_many: bool = False) -> dict:
         from .actions.delete import ActionInput
         action_input = ActionInput(collection=collection, filter=filter, delete_many=delete_many)
         self.logger.info(f"Deleting from collection: {collection}")
         return delete(self.config, self.connection, action_input)
-    
+
     def upsert(self, collection: str, filter: dict, update_data: dict, update_many: bool = False) -> dict:
         from .actions.upsert import ActionInput
         action_input = ActionInput(collection=collection, filter=filter, update=update_data, update_many=update_many)
@@ -95,7 +98,7 @@ class MongoDBRoomsAddon:
         if not self.config or not hasattr(self.config, 'scheme'):
             self.logger.error("No valid configuration found. Cannot initialize connection.")
             return False
-            
+
         self.logger.info("Initializing connection with provided configuration...")
         try:
             uri = build_uri(self.config)
@@ -115,7 +118,7 @@ class MongoDBRoomsAddon:
         Test function for template rooms package.
         Tests each module and reports available components.
         Test connections with credentials if required.
-        
+
         Returns:
             bool: True if test passes, False otherwise
         """
@@ -149,7 +152,7 @@ class MongoDBRoomsAddon:
                                 if component_name in ['ActionInput', 'ActionOutput', 'ActionResponse', 'OutputBase', 'TokensSchema']:
                                     self.logger.info(f"Component {component_name} requires parameters, skipping instantiation")
                                     skip_instantiation = True
-                                
+
                                 if not skip_instantiation:
                                     # result = component()
                                     self.logger.info(f"Component {component_name}() would be executed successfully")
@@ -169,35 +172,35 @@ class MongoDBRoomsAddon:
         self.logger.info("Template rooms package test completed successfully!")
         self.logger.info(f"Total components loaded: {total_components} across {len(self.modules)} modules")
         return True
-    
+
     def loadAddonConfig(self, addon_config: dict):
         """
         Load addon configuration.
-        
+
         Args:
             addon_config (dict): Addon configuration dictionary
-        
+
         Returns:
             bool: True if configuration is loaded successfully, False otherwise
         """
         try:
             from mongodb_rooms_pkg.configuration import CustomAddonConfig
-            
+
             self.logger.debug(f"Received addon_config: {addon_config}")
-            
+
             config_data = addon_config.copy()
             if 'config' in addon_config and isinstance(addon_config['config'], dict):
                 config_data.update(addon_config['config'])
                 self.logger.debug(f"Merged config_data: {config_data}")
-            
+
             self.config = CustomAddonConfig(**config_data)
             self.logger.info(f"Addon configuration loaded successfully: {self.config}")
-            
+
             connection_success = self.initConnection()
             if not connection_success:
                 self.logger.error("Connection initialization failed after loading configuration")
                 return False
-                
+
             return True
         except Exception as e:
             self.logger.error(f"Failed to load addon configuration: {e}")
@@ -207,10 +210,10 @@ class MongoDBRoomsAddon:
         """
         Load credentials and store them in the credentials registry.
         Takes individual secrets as keyword arguments for validation.
-        
+
         Args:
             **kwargs: Individual credential key-value pairs
-        
+
         Returns:
             bool: True if credentials are loaded successfully, False otherwise
         """
@@ -222,7 +225,7 @@ class MongoDBRoomsAddon:
                 missing_secrets = [secret for secret in required_secrets if secret not in kwargs]
                 if missing_secrets:
                     raise ValueError(f"Missing required secrets: {missing_secrets}")
-            
+
             self.credentials.store_multiple(kwargs)
             self.logger.info(f"Loaded {len(kwargs)} credentials successfully")
             return True

@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from mongodb_rooms_pkg.services.connection import build_uri, create_connection
+
+import pytest
+
 from mongodb_rooms_pkg.configuration.addonconfig import CustomAddonConfig
+from mongodb_rooms_pkg.services.connection import build_uri, create_connection
 
 
 def get_base_config():
@@ -231,10 +233,10 @@ class TestCreateConnection:
     def test_create_connection_success(self, mock_mongo_client):
         mock_client = MagicMock()
         mock_mongo_client.return_value = mock_client
-        
+
         uri = "mongodb://localhost:27017/testdb"
         result = create_connection(uri)
-        
+
         assert result == mock_client
         mock_mongo_client.assert_called_once_with(uri, serverSelectionTimeoutMS=5000)
         mock_client.admin.command.assert_called_once_with("ping")
@@ -243,35 +245,35 @@ class TestCreateConnection:
     def test_create_connection_failure(self, mock_mongo_client):
         from pymongo.errors import ConnectionFailure
         mock_mongo_client.side_effect = ConnectionFailure("Connection failed")
-        
+
         uri = "mongodb://localhost:27017/testdb"
         result = create_connection(uri)
-        
+
         assert result is None
 
     @patch('mongodb_rooms_pkg.services.connection.MongoClient')
     def test_create_connection_auth_error(self, mock_mongo_client):
         mock_mongo_client.side_effect = Exception("Authentication failed")
-        
+
         uri = "mongodb://user:pass@localhost:27017/testdb"
         result = create_connection(uri)
-        
+
         assert result is None
 
     @patch('mongodb_rooms_pkg.services.connection.MongoClient')
     def test_create_connection_invalid_uri_error(self, mock_mongo_client):
         mock_mongo_client.side_effect = Exception("Invalid URI format")
-        
+
         uri = "invalid://localhost:27017/testdb"
         result = create_connection(uri)
-        
+
         assert result is None
 
     @patch('mongodb_rooms_pkg.services.connection.MongoClient')
     def test_create_connection_generic_error(self, mock_mongo_client):
         mock_mongo_client.side_effect = ValueError("Some other error")
-        
+
         uri = "mongodb://localhost:27017/testdb"
         result = create_connection(uri)
-        
+
         assert result is None

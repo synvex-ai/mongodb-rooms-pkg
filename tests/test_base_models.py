@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
-from mongodb_rooms_pkg.actions.base import TokensSchema, OutputBase, ActionResponse
+
+from mongodb_rooms_pkg.actions.base import ActionResponse, OutputBase, TokensSchema
 
 
 class TestTokensSchema:
@@ -12,14 +13,14 @@ class TestTokensSchema:
     def test_tokens_schema_validation(self):
         with pytest.raises(ValidationError):
             TokensSchema(stepAmount="invalid", totalCurrentAmount=1000)
-        
+
         with pytest.raises(ValidationError):
             TokensSchema(stepAmount=100, totalCurrentAmount="invalid")
 
     def test_tokens_schema_missing_fields(self):
         with pytest.raises(ValidationError):
             TokensSchema(stepAmount=100)
-        
+
         with pytest.raises(ValidationError):
             TokensSchema(totalCurrentAmount=1000)
 
@@ -43,7 +44,7 @@ class TestOutputBase:
         class CustomOutput(OutputBase):
             message: str
             count: int
-        
+
         custom_output = CustomOutput(message="test", count=5)
         assert custom_output.message == "test"
         assert custom_output.count == 5
@@ -54,14 +55,14 @@ class TestActionResponse:
     def test_valid_action_response(self):
         tokens = TokensSchema(stepAmount=100, totalCurrentAmount=1000)
         output = OutputBase()
-        
+
         response = ActionResponse(
             output=output,
             tokens=tokens,
             message="Success",
             code=200
         )
-        
+
         assert response.output == output
         assert response.tokens == tokens
         assert response.message == "Success"
@@ -70,9 +71,9 @@ class TestActionResponse:
     def test_action_response_minimal(self):
         tokens = TokensSchema(stepAmount=100, totalCurrentAmount=1000)
         output = OutputBase()
-        
+
         response = ActionResponse(output=output, tokens=tokens)
-        
+
         assert response.output == output
         assert response.tokens == tokens
         assert response.message is None
@@ -86,17 +87,17 @@ class TestActionResponse:
         class CustomOutput(OutputBase):
             result: str
             success: bool
-        
+
         tokens = TokensSchema(stepAmount=50, totalCurrentAmount=500)
         output = CustomOutput(result="completed", success=True)
-        
+
         response = ActionResponse(
             output=output,
             tokens=tokens,
             message="Operation completed",
             code=201
         )
-        
+
         assert response.output.result == "completed"
         assert response.output.success is True
         assert response.tokens.stepAmount == 50
@@ -106,16 +107,16 @@ class TestActionResponse:
     def test_action_response_serialization(self):
         tokens = TokensSchema(stepAmount=100, totalCurrentAmount=1000)
         output = OutputBase()
-        
+
         response = ActionResponse(
             output=output,
             tokens=tokens,
             message="Test message",
             code=200
         )
-        
+
         response_dict = response.model_dump()
-        
+
         assert "output" in response_dict
         assert "tokens" in response_dict
         assert response_dict["message"] == "Test message"

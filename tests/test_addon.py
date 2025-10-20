@@ -29,7 +29,7 @@ class TestMongoDBRoomsAddon:
         addon = MongoDBRoomsAddon()
         config_data = {
             "id": "test_id",
-            "name": "test_name", 
+            "name": "test_name",
             "description": "test_desc",
             "type": "storage",
             "host": "localhost",
@@ -78,9 +78,9 @@ class TestMongoDBRoomsAddon:
 
     def test_init_connection_no_config(self):
         addon = MongoDBRoomsAddon()
-        
+
         result = addon.initConnection()
-        
+
         assert result is False
 
     def test_init_connection_success(self):
@@ -91,19 +91,19 @@ class TestMongoDBRoomsAddon:
 
         with patch('mongodb_rooms_pkg.addon.build_uri', return_value="mongodb://test") as mock_build_uri, \
              patch('mongodb_rooms_pkg.addon.create_connection', return_value=Mock()) as mock_create_conn:
-            
+
             result = addon.initConnection()
-            
+
             mock_build_uri.assert_called_once_with(mock_config)
             mock_create_conn.assert_called_once_with("mongodb://test")
             assert result is True
 
     def test_describe_action(self):
         addon = MongoDBRoomsAddon()
-        
+
         with patch('mongodb_rooms_pkg.addon.describe', return_value={"status": "success"}) as mock_describe:
             result = addon.describe()
-            
+
             mock_describe.assert_called_once_with(addon.config, addon.connection)
             assert result == {"status": "success"}
 
