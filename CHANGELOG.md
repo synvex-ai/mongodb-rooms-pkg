@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.4.4 (2025-10-25)
+
+### Bug Fixes
+
+- Default no desc
+  ([`034e1d6`](https://github.com/nexroo-ai/mongodb-rooms-pkg/commit/034e1d643bf7a552521ad43c5a8743d962f02298))
+
+
 ## v1.4.3 (2025-10-20)
 
 
